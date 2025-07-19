@@ -9,6 +9,7 @@ venv/
 fvenv/
 
 .vscode/
+launch.json
 
 .mypy_cache/
 .pytest_cache/
