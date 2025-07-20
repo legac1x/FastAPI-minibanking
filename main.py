@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 import uvicorn
 
+from app.api.endpoints.users import user_router
+
 app = FastAPI()
+app.include_router(user_router)
 
 @app.get('/test')
 async def home() -> dict:

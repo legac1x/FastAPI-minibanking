@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from passlib.context import CryptContext
 
+from app.api.schemas.users import UserOut
 from app.db.database import get_db
 from app.db.models import User
 from app.core.config import settings
@@ -17,7 +18,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 15
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 
-pwd = CryptContext(schemes=['bcrypt'], deprecated=True)
+pwd = CryptContext(schemes=['bcrypt'], deprecated="auto")
 
 async def get_user_from_db(username: str, session: AsyncSession) ->  User:
     query = await session.execute(select(User).where(User.username == username))
@@ -54,7 +55,7 @@ async def create_access_token(data: dict, expire_time: timedelta | None = None) 
     access_token = jwt.encode(payload=to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
     return access_token
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[AsyncSession, Depends(get_db)]) -> UserOut:
     try:
         payload = jwt.decode(jwt=token, key=SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get('sub')
@@ -64,7 +65,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: An
                 detail="Invalid token"
             )
         user = await get_user_from_db(username, db)
-        return user
+        return UserOut(
+            first_name=user.first_name,
+            last_name=user.last_name,
+            username=user.username
+        )
     except jwt.exceptions.InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
