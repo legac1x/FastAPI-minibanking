@@ -22,7 +22,3 @@ async def login(user_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: 
 async def sign_up_user(user_data: SignUp, db: Annotated[AsyncSession, Depends(get_db)]):
     await sign_up_user_services(user_data=user_data, session=db)
     return {"message": "User successfuly created"}
-
-@user_router.get("/me")
-async def get_me(current_user: Annotated[UserOut, Depends(get_current_user)]):
-    return current_user
