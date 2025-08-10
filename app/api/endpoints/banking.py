@@ -9,11 +9,11 @@ from app.api.schemas.users import UserOut
 from app.api.schemas.banking import UserAccount, TransferDataBalance, DepositeAccountBalance
 from app.services.banking import (
     add_account_service,
-    get_all_acctounts_service,
-    get_certaion_account_service,
+    get_all_accounts_service,
+    get_certain_account_service,
     transfer_money_service,
     delete_account_service,
-    deposite_account_balance_service
+    deposit_account_balance_service
 )
 
 
@@ -27,7 +27,7 @@ async def add_new_account(
 ):
 
     await add_account_service(account_name=account_name, username=user_data.username, session=db)
-    return {"message": "New account was successfuly created"}
+    return {"message": "New account was successfully created"}
 
 @banking_router.get('/account/{account_name}')
 async def get_certain_account(
@@ -36,17 +36,14 @@ async def get_certain_account(
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> UserAccount:
     user = await get_user_from_db(user.username, session=db)
-    return await get_certaion_account_service(account_name=account_name, session=db, user_id=user.id)
+    return await get_certain_account_service(account_name=account_name, session=db, user_id=user.id)
 
 @banking_router.get('/accounts')
 async def get_all_accounts(
     user_data: Annotated[UserOut, Depends(get_current_user)],
-    user: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> dict:
-
-    user = await get_user_from_db(user.username, session=db)
-    res = await get_all_acctounts_service(username=user_data.username, session=db, user_id=user.id)
+    res = await get_all_accounts_service(username=user_data.username, session=db)
     return {"username": user_data.username, "Accounts": res}
 
 @banking_router.post('/change/transfer')
@@ -56,7 +53,6 @@ async def transfer_money(
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> dict:
     user = await get_user_from_db(user.username, session=db)
-    print(f"{transfer_data.transfer_username} из endpoiunt'а")
     await transfer_money_service(
         account_name=transfer_data.account_name,
         amount=transfer_data.amount,
@@ -67,20 +63,20 @@ async def transfer_money(
     )
     return {"message": "The money was successfully transferred"}
 
-@banking_router.post("/change/deposite")
-async def deposite_account_balance(
-    deposite_account_data: DepositeAccountBalance,
+@banking_router.post("/change/deposit")
+async def deposit_account_balance(
+    deposit_account_data: DepositeAccountBalance,
     user: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
     user = await get_user_from_db(user.username, session=db)
-    await deposite_account_balance_service(
-        account_name=deposite_account_data.account_name,
-        amount=deposite_account_data.amount,
+    await deposit_account_balance_service(
+        account_name=deposit_account_data.account_name,
+        amount=deposit_account_data.amount,
         session=db,
         user_id=user.id
     )
-    return {"message": "Account has been successfuly replenished"}
+    return {"message": "Account has been successfully replenished"}
 
 @banking_router.delete('/delete')
 async def delete_account(
@@ -90,4 +86,4 @@ async def delete_account(
 ):
     user = await get_user_from_db(user.username, session=db)
     await delete_account_service(account_name=account_name, session=db, user_id=user.id)
-    return {"message": "The bank account was successfuly deleted"}
+    return {"message": "The bank account was successfully deleted"}

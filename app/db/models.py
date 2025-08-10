@@ -46,7 +46,7 @@ class Transaction(Base):
     __tablename__ = "transactions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    from_account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False)
+    from_account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=True)
     to_account_id: Mapped[int] = mapped_column(ForeignKey("accounts.id"), nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))

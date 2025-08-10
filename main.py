@@ -12,6 +12,5 @@ app.include_router(banking_router)
 async def home() -> dict:
     return {"message": "Welcome to my API!"}
 
-
 if __name__ == "__main__":
     uvicorn.run(app, host='127.0.0.1', port=8000)
