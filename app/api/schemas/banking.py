@@ -16,3 +16,7 @@ class TransferDataBalance(BaseModel):
     amount: float
     transfer_username: str | None = None
     transfer_account_name: str
+
+class TransactionHistory(BaseModel):
+    description: str
+    amount: str

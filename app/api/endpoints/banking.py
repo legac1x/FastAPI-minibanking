@@ -13,7 +13,8 @@ from app.services.banking import (
     get_certain_account_service,
     transfer_money_service,
     delete_account_service,
-    deposit_account_balance_service
+    deposit_account_balance_service,
+    get_transaction_hisotry_service
 )
 
 
@@ -77,6 +78,15 @@ async def deposit_account_balance(
         user_id=user.id
     )
     return {"message": "Account has been successfully replenished"}
+
+@banking_router.get("/transaction/history/{account_name}")
+async def get_transaction_history(
+    account_name: str,
+    user: Annotated[UserOut, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)]
+):
+    result = await get_transaction_hisotry_service(user_data=user, account_name=account_name, session=db)
+    return result
 
 @banking_router.delete('/delete')
 async def delete_account(
