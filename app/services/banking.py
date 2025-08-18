@@ -3,12 +3,13 @@ from typing import List
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import selectinload
 
 from app.db.models import User, Account, Transaction
 from app.api.schemas.banking import UserAccount, TransactionHistory
 from app.api.schemas.users import UserOut
 from app.core.security import get_user_from_db
+from app.services.redis_service import save_transaction, check_user_cache_transaction, get_transaction_history_redis
 
 async def add_account_service(account_name: str, username: str, session: AsyncSession):
     query_account = await session.execute(select(Account).where(Account.name == account_name))
@@ -68,6 +69,7 @@ async def deposit_account_balance_service(
         description=f"Пополнение счета {account_name}",
         user_id=user_id
     )
+    save_transaction(history_transaction=history_transaction, acc_name=account_name)
     session.add(history_transaction)
     account.balance += amount
     await session.commit()
@@ -103,6 +105,7 @@ async def transfer_money_service(
         description=f"Перевод со счета {account_name} на {transfer_account_name}",
         user_id=user_id
     )
+    save_transaction(history_transaction=history_transaction, acc_name=account_name)
     session.add(history_transaction)
     account.balance -= amount
     transfer_account.balance += amount
@@ -110,21 +113,26 @@ async def transfer_money_service(
 
 async def get_transaction_hisotry_service(user_data: UserOut, account_name: str, session: AsyncSession):
     user = await get_user_from_db(username=user_data.username, session=session)
-    account = await get_account(acc_name=account_name, session=session, user_id=user.id)
-    history_query = await session.execute(select(Transaction).where(
-        or_(and_(Transaction.from_account_id == None, Transaction.to_account_id == account.id),
-            (Transaction.from_account_id == account.id))
-    ))
-    history = history_query.scalars().all()
-    a = []
-    for h in history:
-        a.append(
-            TransactionHistory(
-                description=h.description,
-                amount=f"{"+" if h.from_account_id is None else "-"}{h.amount}"
+    if check_user_cache_transaction(user_id=user.id, acc_name=account_name):
+        result = get_transaction_history_redis(user_id=user.id, acc_name=account_name)
+
+    else:
+        account = await get_account(acc_name=account_name, session=session, user_id=user.id)
+        history_query = await session.execute(select(Transaction).where(
+            or_(and_(Transaction.from_account_id == None, Transaction.to_account_id == account.id),
+                (Transaction.from_account_id == account.id))
+        ))
+        history = history_query.scalars().all()
+        result = []
+        for h in history:
+            save_transaction(history_transaction=h, acc_name=account_name)
+            result.append(
+                TransactionHistory(
+                    description=h.description,
+                    amount=f"{"+" if h.from_account_id is None else "-"}{h.amount}"
+                )
             )
-        )
-    return a
+    return result
 
 async def delete_account_service(account_name: str, session: AsyncSession, user_id: int):
     account = await get_account(acc_name=account_name, session=session, user_id=user_id)
