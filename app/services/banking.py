@@ -115,7 +115,6 @@ async def get_transaction_hisotry_service(user_data: UserOut, account_name: str,
     user = await get_user_from_db(username=user_data.username, session=session)
     if check_user_cache_transaction(user_id=user.id, acc_name=account_name):
         result = get_transaction_history_redis(user_id=user.id, acc_name=account_name)
-
     else:
         account = await get_account(acc_name=account_name, session=session, user_id=user.id)
         history_query = await session.execute(select(Transaction).where(
