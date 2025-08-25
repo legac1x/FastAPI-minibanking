@@ -43,6 +43,11 @@ async def authenticate_user(username: str, password: str, session: AsyncSession)
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password."
         )
+    if not user.is_email_verified:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email not verified. Check your email."
+        )
     return user
 
 async def create_access_token(data: dict, expire_time: timedelta | None = None) -> str:

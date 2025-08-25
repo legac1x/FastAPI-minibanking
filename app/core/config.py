@@ -8,6 +8,8 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     ALGORITHM: str
+    EMAIL_HOST: str
+    EMAIL_PASSWORD: str
 
     @property
     def ASYNC_DATABASE_URL(self):

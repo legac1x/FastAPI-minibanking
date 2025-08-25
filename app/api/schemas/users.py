@@ -9,8 +9,13 @@ class SignUp(BaseModel):
     password: str
     first_name: str
     last_name: str
+    email: str
 
 class UserOut(BaseModel):
     first_name: str
     last_name: str
     username: str
+
+class EmailVerificationRequest(BaseModel):
+    email: str
+    code: int
