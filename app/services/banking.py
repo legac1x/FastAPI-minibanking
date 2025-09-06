@@ -61,6 +61,13 @@ async def deposit_account_balance_service(
     session: AsyncSession,
     user_id: int
 ) -> None:
+
+    if amount <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Amount must be greater than zero"
+        )
+
     account = await get_account(acc_name=account_name, session=session, user_id=user_id)
     history_transaction = Transaction(
         from_account=None,
@@ -82,22 +89,30 @@ async def transfer_money_service(
     transfer_account_name: str,
     transfer_username: str | None = None,
 ) -> None:
-    account = await get_account(acc_name=account_name, session=session, user_id=user_id)
     if transfer_account_name is None:
         raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Enter transfer account name"
             )
-    if transfer_username is None:
-        transfer_account = await get_account(acc_name=transfer_account_name, session=session, user_id=user_id)
-    else:
-        to_user = await get_user_from_db(username=transfer_username, session=session)
-        transfer_account = await get_account(acc_name=transfer_account_name, session=session, user_id=to_user.id)
+    if amount <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Amount must be greater than zero"
+        )
+
+    account = await get_account(acc_name=account_name, session=session, user_id=user_id)
     if amount > account.balance:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="There are insufficient funds in the account"
         )
+    
+    if transfer_username is None:
+        transfer_account = await get_account(acc_name=transfer_account_name, session=session, user_id=user_id)
+    else:
+        to_user = await get_user_from_db(username=transfer_username, session=session)
+        transfer_account = await get_account(acc_name=transfer_account_name, session=session, user_id=to_user.id)
+
     history_transaction = Transaction(
         from_account=account,
         to_account=transfer_account,

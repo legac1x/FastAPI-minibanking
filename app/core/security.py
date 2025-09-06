@@ -20,7 +20,7 @@ ALGORITHM = settings.ALGORITHM
 
 pwd = CryptContext(schemes=['bcrypt'], deprecated="auto")
 
-async def get_user_from_db(username: str, session: AsyncSession) ->  User:
+async def get_user_from_db(username: str, session: AsyncSession) -> User:
     query = await session.execute(select(User).where(User.username == username))
     user = query.scalar_one_or_none()
     if not user:
