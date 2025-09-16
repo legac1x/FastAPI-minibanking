@@ -18,7 +18,6 @@ def _is_valid_email(email: str):
 
     pattern = r'^[a-zA-Z0-9][a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9а-яА-ЯёЁ.-]+\.[a-zA-Zа-яА-ЯёЁ]{2,}$'
     if not re.match(pattern, email, re.IGNORECASE):
-        # Детальный анализ ошибки
         if '@' not in email:
             return False, "Отсутствует символ @"
 
