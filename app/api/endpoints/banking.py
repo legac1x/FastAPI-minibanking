@@ -7,6 +7,7 @@ from app.core.security import get_current_user, get_user_from_db
 from app.db.database import get_db
 from app.api.schemas.users import UserOut
 from app.api.schemas.banking import UserAccount, TransferDataBalance, DepositeAccountBalance
+from app.core.logging import logger
 from app.services.banking import (
     add_account_service,
     get_all_accounts_service,
@@ -26,7 +27,7 @@ async def add_new_account(
     user_data: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
-
+    logger.info("Конечная тока по созданию нового счета '%s'", account_name)
     await add_account_service(account_name=account_name, username=user_data.username, session=db)
     return {"message": "New account was successfully created"}
 
@@ -36,6 +37,7 @@ async def get_certain_account(
     user: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> UserAccount:
+    logger.info("Конечная точка по возврату счета '%s'", account_name)
     user = await get_user_from_db(user.username, session=db)
     return await get_certain_account_service(account_name=account_name, session=db, user_id=user.id)
 
@@ -44,6 +46,7 @@ async def get_all_accounts(
     user_data: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> dict:
+    logger.info("Конечная точка по возврату всех счетов")
     res = await get_all_accounts_service(username=user_data.username, session=db)
     return {"username": user_data.username, "Accounts": res}
 
@@ -53,6 +56,7 @@ async def transfer_money(
     user: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ) -> dict:
+    logger.info("Конечная точка по переведу средств между счетами '%s' и '%s'", transfer_data.account_name, transfer_data.transfer_account_name)
     user = await get_user_from_db(user.username, session=db)
     await transfer_money_service(
         account_name=transfer_data.account_name,
@@ -70,6 +74,7 @@ async def deposit_account_balance(
     user: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
+    logger.info("Конечная точка по пополнению счета '%s' на %d средств", deposit_account_data.account_name, deposit_account_data.amount)
     user = await get_user_from_db(user.username, session=db)
     await deposit_account_balance_service(
         account_name=deposit_account_data.account_name,
@@ -85,6 +90,7 @@ async def get_transaction_history(
     user: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
+    logger.info("Конечная точка по получению списка последних 10 транзакций счета '%s' пользователя '%s'", account_name, user.username)
     result = await get_transaction_hisotry_service(user_data=user, account_name=account_name, session=db)
     return result
 
@@ -94,6 +100,7 @@ async def delete_account(
     user: Annotated[UserOut, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
+    logger.info("Конечная точка для удаления счета '%s' пользователя '%s'", account_name, user.username)
     user = await get_user_from_db(user.username, session=db)
     await delete_account_service(account_name=account_name, session=db, user_id=user.id)
     return {"message": "The bank account was successfully deleted"}
