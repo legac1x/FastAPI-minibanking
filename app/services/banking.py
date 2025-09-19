@@ -1,5 +1,5 @@
 from typing import List
-
+import logging
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, and_
@@ -10,7 +10,9 @@ from app.api.schemas.banking import UserAccount, TransactionHistory
 from app.api.schemas.users import UserOut
 from app.core.security import get_user_from_db
 from app.services.redis_service import save_transaction, check_user_cache_transaction, get_transaction_history_redis
-from app.core.logging import logger
+# from app.core.logging import logger
+
+logger = logging.getLogger(__name__)
 
 async def add_account_service(account_name: str, username: str, session: AsyncSession):
     logger.debug("Проверка существования счета с именем '%s'", account_name)
