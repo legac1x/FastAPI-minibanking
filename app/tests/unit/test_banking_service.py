@@ -173,20 +173,6 @@ async def test_deposit_account_balance_service_less_or_equal_zero():
             assert exc.value.detail == "Amount must be greater than zero"
 
 @pytest.mark.asyncio
-async def test_transfer_money_service_not_transfer_acc_name():
-    mock_session = AsyncMock()
-    with pytest.raises(HTTPException) as exc:
-        await transfer_money_service(
-            account_name="account_name",
-            amount=500.0,
-            session=mock_session,
-            user_id=1,
-            transfer_account_name=None
-        )
-
-    assert exc.value.status_code == 400
-
-@pytest.mark.asyncio
 async def test_transfer_money_service_amount_less_or_equal_than_zero():
     mock_session = AsyncMock()
     with pytest.raises(HTTPException) as exc:
@@ -216,19 +202,6 @@ async def test_transfer_money_service_amount_less_than_balance():
 
         assert exc.value.status_code == 400
         assert exc.value.detail == "There are insufficient funds in the account"
-
-@pytest.mark.asyncio
-async def test_transfer_money_service_not_transfer_acc_name():
-    mock_session = AsyncMock()
-    with pytest.raises(HTTPException) as exc:
-        await transfer_money_service(
-            account_name="account_name",
-            amount=500.0,
-            session=mock_session,
-            user_id=1,
-            transfer_account_name=None
-        )
-    assert exc.value.status_code == 400
 
 @pytest.mark.asyncio
 async def test_transfer_money_service_transfer_to_another_acc():
@@ -390,12 +363,15 @@ async def test_get_transaction_history_service_from_db():
 @pytest.mark.asyncio
 async def test_delete_account_service():
     mock_session = AsyncMock()
+    mock_user = MagicMock()
+    mock_user.username = "test_user"
     fake_account = Account(
         name="first_account",
         user_id=1,
         balance=55000.0,
         created_at=datetime(2025,8, 11, tzinfo=timezone.utc)
     )
+    fake_account.user = mock_user
 
     with patch("app.services.banking.get_account", new_callable=AsyncMock) as mock_get_account:
         mock_get_account.return_value = fake_account

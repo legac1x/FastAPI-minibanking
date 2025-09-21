@@ -1,5 +1,4 @@
 import json
-from redis import RedisError
 
 from app.core.redis import get_redis
 from app.api.schemas.banking import TransactionHistory

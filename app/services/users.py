@@ -66,7 +66,10 @@ async def sign_up_user_services(user_data: SignUp, session: AsyncSession):
             user_data.username,
             reason
         )
-        return False
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email"
+        )
 
     user = User(
         username=user_data.username,

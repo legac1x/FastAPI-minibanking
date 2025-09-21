@@ -15,6 +15,13 @@ from app.services.redis_service import save_transaction, check_user_cache_transa
 logger = logging.getLogger(__name__)
 
 async def add_account_service(account_name: str, username: str, session: AsyncSession):
+    if len(account_name) < 1:
+        logger.warning("Попытка создания счета с пустым именем")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The length of account name has to be more or equal then 0"
+        )
+
     logger.debug("Проверка существования счета с именем '%s'", account_name)
     query_account = await session.execute(select(Account).where(Account.name == account_name))
     account = query_account.scalar_one_or_none()
