@@ -1,8 +1,8 @@
-"""Initial commit
+"""create tables postgres
 
-Revision ID: c53fddcf9060
+Revision ID: 9f16fb416bce
 Revises: 
-Create Date: 2025-07-21 02:44:22.280786
+Create Date: 2025-09-21 22:06:59.933547
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c53fddcf9060'
+revision: str = '9f16fb416bce'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,11 +27,17 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(length=30), nullable=False),
     sa.Column('username', sa.String(length=30), nullable=False),
     sa.Column('hashed_password', sa.String(length=100), nullable=False),
+    sa.Column('email', sa.String(), nullable=False),
+    sa.Column('is_email_verified', sa.Boolean(), nullable=False),
+    sa.Column('email_verification_code', sa.String(), nullable=True),
+    sa.Column('email_verification_code_expires', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
     op.create_table('accounts',
     sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('balance', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -40,13 +46,15 @@ def upgrade() -> None:
     )
     op.create_table('transactions',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('from_account_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('from_account_id', sa.Integer(), nullable=True),
     sa.Column('to_account_id', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('timestamp', sa.DateTime(), nullable=False),
     sa.Column('description', sa.String(length=150), nullable=False),
     sa.ForeignKeyConstraint(['from_account_id'], ['accounts.id'], ),
     sa.ForeignKeyConstraint(['to_account_id'], ['accounts.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

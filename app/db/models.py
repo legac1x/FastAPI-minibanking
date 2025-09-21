@@ -18,7 +18,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     is_email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    email_verification_code: Mapped[str] = mapped_column(String, nullable=True)
+    email_verification_code: Mapped[int] = mapped_column(Integer, nullable=True)
     email_verification_code_expires: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     accounts: Mapped[List["Account"]] = relationship("Account", back_populates="user", cascade="all, delete-orphan")
@@ -31,7 +31,7 @@ class Account(Base):
     name: Mapped[str] = mapped_column(String(50), default="first_account", nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     balance: Mapped[float] = mapped_column(Float, default=0, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.now(timezone.utc))
 
     user: Mapped["User"] = relationship("User", back_populates="accounts")
     outgoing_transactions: Mapped[List["Transaction"]] = relationship(
