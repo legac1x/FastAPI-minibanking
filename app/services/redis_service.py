@@ -43,5 +43,5 @@ def get_transaction_history_redis(user_id: int, acc_name: str):
     logger.debug("Формирование списка последних транзакций счета '%s'", acc_name)
     for h in cache:
         history.append(TransactionHistory(**json.loads(h.decode())))
-    logger.info("Возврат %d транзакций из кеша для счета '%s' пользователю", list(history), acc_name)
+    logger.info("Возврат %d транзакций из кеша для счета '%s' пользователю", len(history), acc_name)
     return history
