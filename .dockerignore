@@ -12,3 +12,5 @@ fvenv/
 
 .git/
 .gitignore
+keys.txt
+keys.txt.pub

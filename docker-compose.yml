@@ -1,58 +1,61 @@
 services:
   web:
-    build: .
-    environment:
-      - DB_HOST=db
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - DB_NAME=${DB_NAME}
-    volumes:
-      - .:/minibanking
-    ports:
-      - 8000:8000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: minibanking:latest
+    env_file: .env
     depends_on:
-      - db
-      - redis
-    networks:
-      - test
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
-  redis:
-    image: redis:latest
-    container_name: myredis
-    networks:
-      - test
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
-      - 6379:6379
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()\""]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+  redis:
+    image: redis:8
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
   worker:
-    build: .
-    volumes:
-      - .:/minibanking
-    networks:
-      - test
-    depends_on:
-      - redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: banking-worker:latest
     command: celery -A app.core.celery worker --loglevel=info
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
   db:
-    image: postgres:17-alpine
-    container_name: db
+    image: postgres:17
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
-      - POSTGRES_DB=${DB_NAME}
-    restart: always
-    shm_size: 128mb
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    networks:
-      - test
-
-networks:
-  test:
-    driver: bridge
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
 volumes:
   postgres-data:

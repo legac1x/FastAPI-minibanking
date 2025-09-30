@@ -9,7 +9,7 @@ def setup_logging():
 
 
     stdout_handler = logging.StreamHandler(sys.stdout)
-    file_handler = logging.FileHandler("app.log", encoding="utf-8")
+    file_handler = logging.FileHandler("/minibanking/logs/app.log", encoding="utf-8")
 
     stdout_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)

@@ -19,3 +19,5 @@ htmlcov/
 
 .idea/
 *.iml
+keys.txt
+keys.txt.pub

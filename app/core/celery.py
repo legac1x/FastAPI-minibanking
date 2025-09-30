@@ -1,8 +1,9 @@
 from celery import Celery
+from app.core.config import settings
 
 celery_app = Celery(
     "celery_app",
-    broker="redis://redis:6379/0",
-    backend="redis://redis:6379/1",
+    broker=settings.REDIS_BROKER_URL,
+    backend=settings.REDIS_BACKEND_URL,
     include=["app.tasks.email_task"]
 )

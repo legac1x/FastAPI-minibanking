@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     ALGORITHM: str
     EMAIL_HOST: str
     EMAIL_PASSWORD: str
+    REDIS_BROKER_URL: str
+    REDIS_BACKEND_URL: str
 
     @property
     def ASYNC_DATABASE_URL(self):
