@@ -1,23 +1,30 @@
 __pycache__/
-pytest_cache/
-*.pyc
 *.py[cod]
-*.sqlite3
-*.db
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
 *.log
 
+*.sqlite3
+*.db
+
 .env
+.venv/
 .fvenv/
 fvenv/
 
 .vscode/
+.idea/
+*.iml
 launch.json
 
 .mypy_cache/
 .pytest_cache/
 htmlcov/
+.coverage
+.cache
 
-.idea/
-*.iml
 keys.txt
 keys.txt.pub
