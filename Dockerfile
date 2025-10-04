@@ -12,4 +12,4 @@ RUN pip install -r requirements.txt
 COPY --chown=user:groupfastapi . .
 USER user
 EXPOSE 8000
-CMD gunicorn main:app -k uvicorn.workers.UvicornWorker -w 4 -b 0.0.0.0:8000
+CMD gunicorn main:app -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:8000
